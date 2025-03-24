@@ -1,179 +1,77 @@
 package com.eduguard.mobile.ui.screen.subject_selector
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.eduguard.mobile.data.model.Subject
+import com.eduguard.mobile.data.viewmodel.SubjectViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-
-fun SubjectSelectorScreen(navController: NavHostController) {
-    // Настройка цветовой схемы MaterialTheme
-    val blueColor = Color(0xFF1E88E5) // Синий цвет
-    val whiteColor = Color.White // Белый цвет
-
-    MaterialTheme(
-        colorScheme = lightColorScheme(
-            primary = blueColor,
-            onPrimary = whiteColor,
-            surface = whiteColor,
-            onSurface = blueColor
-        )
-    ) {
-        var subjects by remember { mutableStateOf(listOf<String>()) }
-        var newSubjectName by remember { mutableStateOf("") }
-        var isAddingSubject by remember { mutableStateOf(false) }
-        val focusManager = LocalFocusManager.current
-        Scaffold(
-        ) { ip ->
-            Column(
-                modifier = Modifier
-                    .padding(ip)
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Button(
-                    onClick = {
-                        isAddingSubject = true
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = blueColor,
-                        contentColor = whiteColor
-                    ),
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Добавить предмет")
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Добавить предмет")
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                AnimatedVisibility(
-                    visible = isAddingSubject,
-                    enter = expandVertically(),
-                    exit = shrinkVertically()
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        TextField(
-                            value = newSubjectName,
-                            onValueChange = { newSubjectName = it },
-                            label = { Text("Введите название предмета") },
-                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                            keyboardActions = KeyboardActions(
-                                onDone = {
-                                    if (newSubjectName.isNotBlank()) {
-                                        subjects = subjects + newSubjectName
-                                        newSubjectName = ""
-                                        isAddingSubject = false
-                                    }
-                                    focusManager.clearFocus()
-                                }
-                            ),
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = whiteColor,
-                                focusedIndicatorColor = blueColor,
-                                unfocusedIndicatorColor = blueColor.copy(alpha = 0.5f),
-                                cursorColor = blueColor
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Row(
-                            horizontalArrangement = Arrangement.End,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            TextButton(
-                                onClick = {
-                                    isAddingSubject = false
-                                    newSubjectName = ""
-                                },
-                                colors = ButtonDefaults.textButtonColors(contentColor = blueColor)
-                            ) {
-                                Text("Отмена")
-                            }
-
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            Button(
-                                onClick = {
-                                    if (newSubjectName.isNotBlank()) {
-                                        subjects = subjects + newSubjectName
-                                        newSubjectName = ""
-                                        isAddingSubject = false
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = blueColor,
-                                    contentColor = whiteColor
-                                )
-                            ) {
-                                Text("Сохранить")
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(subjects) { subject ->
-                        SubjectItem(
-                            subject = subject,
-                            blueColor = blueColor,
-                            whiteColor = whiteColor,
-                            navController = navController
-                        )
-                    }
-                }
+@Preview
+fun SubjectSelectorScreen(viewModel: SubjectViewModel = viewModel()) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Предметы", fontSize = 20.sp) }
+            )
+        }
+    ) { padding ->
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 150.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(viewModel.subjects) { subject ->
+                SubjectCard(subject = subject, onClick = { viewModel.onSubjectClick(subject) })
             }
         }
     }
 }
 
 @Composable
-fun SubjectItem(subject: String, blueColor: Color, whiteColor: Color , navController: NavHostController) {
-
+fun SubjectCard(subject: Subject, onClick: () -> Unit) {
     Card(
-        onClick = {
-            navController.navigate("home")
-        },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = blueColor)
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        onClick = onClick
     ) {
-        Text(
-            text = subject,
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            style = MaterialTheme.typography.titleMedium,
-            color = whiteColor
-        )
+                .padding(16.dp)
+        ) {
+            Text(
+                text = subject.name,
+                fontSize = 18.sp,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = subject.description,
+                fontSize = 14.sp,
+                color = Color.Gray
+            )
+        }
     }
 }

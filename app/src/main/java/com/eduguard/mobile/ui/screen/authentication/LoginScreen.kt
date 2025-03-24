@@ -19,16 +19,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.eduguard.mobile.data.viewmodel.LoginViewModel
 
 @Composable
-@Preview
 fun LoginScreen(
-    loginVm : LoginViewModel = viewModel()
+    loginVm : LoginViewModel = viewModel(),
+    onChangeMethod : () -> Unit,
+    onAuth : () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -50,11 +50,11 @@ fun LoginScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(10.dp)
                 ) {
-                    LoginForm(loginVm = loginVm)
+                    LoginForm(loginVm = loginVm, onAuth = onAuth)
                     Text(
                         modifier = Modifier
                             .clickable {
-
+                                onChangeMethod()
                             },
                         text = "Нет аккаунта? Зарегистрируйтесь сейчас!",
                         color = Color.Gray
@@ -67,7 +67,8 @@ fun LoginScreen(
 
 @Composable
 fun LoginForm(
-    loginVm : LoginViewModel
+    loginVm : LoginViewModel,
+    onAuth : () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -105,7 +106,7 @@ fun LoginForm(
                 )
             )
             OutlinedButton(
-                onClick = {},
+                onClick = onAuth,
                 colors = ButtonDefaults.buttonColors(
                     contentColor = Color.Black,
                     containerColor = Color.Transparent

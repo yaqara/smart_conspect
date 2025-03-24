@@ -26,9 +26,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.eduguard.mobile.data.viewmodel.RegistrationViewModel
 
 @Composable
-@Preview
 fun RegistrationScreen(
-    registrationVm : RegistrationViewModel = viewModel()
+    registrationVm : RegistrationViewModel = viewModel(),
+    onChangeMethod : () -> Unit,
+    onAuth : () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -58,11 +59,11 @@ fun RegistrationScreen(
                     modifier = Modifier.padding(10.dp)
                 ) {
                     // Здесь можно добавить элементы формы, например TextField и Button
-                    RegistrationForm(registrationVm = registrationVm)
+                    RegistrationForm(registrationVm = registrationVm, onAuth = onAuth)
                     Text(
                         modifier = Modifier
                             .clickable {
-
+                                onChangeMethod()
                             },
                         text = "Есть аккаунт? Войти сейчас!",
                         color = Color.Gray
@@ -75,7 +76,8 @@ fun RegistrationScreen(
 
 @Composable
 fun RegistrationForm(
-    registrationVm : RegistrationViewModel
+    registrationVm : RegistrationViewModel,
+    onAuth : () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -124,7 +126,7 @@ fun RegistrationForm(
                 )
             )
             OutlinedButton(
-                onClick = {},
+                onClick = onAuth,
                 colors = ButtonDefaults.buttonColors(
                     contentColor = Color.Black,
                     containerColor = Color.Transparent
