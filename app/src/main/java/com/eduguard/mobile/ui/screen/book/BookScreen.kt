@@ -99,7 +99,7 @@ fun BookScreen(navController: NavHostController, vm: PdfViewModel) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = 8.dp, bottom = 8.dp),
+                    .padding(end = 8.dp, bottom = 100.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(

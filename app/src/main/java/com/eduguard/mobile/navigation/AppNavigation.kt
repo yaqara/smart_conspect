@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.eduguard.mobile.data.viewmodel.DrawingViewModel
 import com.eduguard.mobile.data.viewmodel.PdfViewModel
+import com.eduguard.mobile.data.viewmodel.SubjectViewModel
 import com.eduguard.mobile.ui.screen.authentication.AuthenticationScreen
 import com.eduguard.mobile.ui.screen.home.HomeScreen
 import com.eduguard.mobile.ui.screen.split_screen.SplitScreen
@@ -20,10 +21,11 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val pdfVm: PdfViewModel = viewModel()
     val drawingVm: DrawingViewModel = viewModel()
+    val subjectVm : SubjectViewModel = viewModel()
 
-    NavHost(navController = navController, startDestination = "menu") {
+    NavHost(navController = navController, startDestination = "auth") {
         composable("auth") {
-            AuthenticationScreen { navController.navigate("menu") }
+            AuthenticationScreen { navController.navigate("home") }
         }
         composable("home") {
             HomeScreen(navController)
@@ -47,8 +49,8 @@ fun AppNavigation() {
                 drawingVm = drawingVm
             )
         }
-//        composable("menu") {
-//            SubjectSelectorScreen(navController)
-//        }
+        composable("menu") {
+            SubjectSelectorScreen(subjectVm)
+        }
     }
 }
