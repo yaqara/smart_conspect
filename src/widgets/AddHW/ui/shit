@@ -1,0 +1,86 @@
+import { FC } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Label } from '~/components/ui/label';
+import { Input } from '~/components/ui/input';
+import { Button } from '~/components/ui/button';
+import  {assignmentSchema, AssignmentFormValues} from '../model/validation';
+ 
+export const AddHWForm:FC = () => {
+  
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<AssignmentFormValues>({
+    resolver: zodResolver(assignmentSchema),
+  });
+
+  const onSubmit = (data: AssignmentFormValues) => {
+    console.log('Сохранение данных:', data);
+    // Здесь можно добавить логику сохранения данных
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Сроки */}
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="deadline"  className="text-sm font-medium">
+            Сроки
+          </label>
+          <Controller
+            name="deadline"
+            control={control}
+            render={({ field }) => (
+              <Input
+                type="date"
+                id="deadline"
+                {...field}
+                className="w-full"
+              />
+            )}
+          />
+          {errors.deadline && <p className="text-red-500">{errors.deadline.message}</p>}
+        </div>
+
+        {/* Прикрепленные файлы */}
+        <div className="flex flex-col space-y-2">
+          <Label htmlFor="attachedFiles" className="text-sm font-medium">
+            Прикрепленные файлы
+          </Label>
+          <Button variant="outline" className="w-full">
+            <i className="fa fa-paperclip mr-2"></i> Перейти в проводник
+          </Button>
+        </div>
+
+        {/* Классы */}
+        <div className="flex flex-col space-y-2">
+          <Label htmlFor="className" className="text-sm font-medium">
+            Классы
+          </Label>
+          <Controller
+            name="className"
+            control={control}
+            render={({ field }) => (
+              <Input
+                type="text"
+                id="className"
+                {...field}
+                placeholder="Введите название класса"
+                className="w-full"
+              />
+            )}
+          />
+          {errors.className && <p className="text-red-500">{errors.className.message}</p>}
+        </div>
+
+        {/* Кнопка сохранения */}
+        <Button type="submit" className="w-full">
+          <i className="fa fa-save mr-2"></i> Сохранить
+        </Button>
+      </form>
+    </div>
+  );
+};
+
