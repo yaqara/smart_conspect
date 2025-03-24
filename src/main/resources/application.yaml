@@ -1,0 +1,26 @@
+ktor:
+  application:
+    modules:
+      - com.smart_conspect.ApplicationKt.module
+  deployment:
+    port: 8080
+    watch:
+      - classes
+  development: true
+
+jwt:
+  domain: "https://your-jwt-provider-domain.com/"
+  audience: "your-audience"
+  realm: "your-realm"
+
+postgres:
+  url: "jdbc:postgresql://localhost:5432/smart_conspect_db"
+  driver: "org.postgresql.Driver"
+  user: "admin"
+  password: "password"
+
+mongodb:
+  uri: "mongodb://localhost:27017"
+  database: "smart_conspect_db"
+  user: "admin"
+  password: "password"
