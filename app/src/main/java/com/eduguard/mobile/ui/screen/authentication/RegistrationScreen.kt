@@ -36,14 +36,6 @@ fun RegistrationScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
-//        // Фон с изображением
-//        Image(
-//            painter = painterResource(id = R.drawable.ic_launcher_background),
-//            contentDescription = null,
-//            modifier = Modifier.fillMaxSize(),
-//            contentScale = ContentScale.Crop // Масштабирование изображения
-//        )
-
 
         Box(
             modifier = Modifier.fillMaxSize(),

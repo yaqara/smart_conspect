@@ -33,10 +33,8 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(Color.Transparent)
     ) {
-//        )
-
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center

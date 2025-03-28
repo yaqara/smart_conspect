@@ -1,18 +1,30 @@
 package com.eduguard.mobile.data.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavHostController
 import com.eduguard.mobile.data.model.Subject
+import java.util.UUID
 
 class SubjectViewModel : ViewModel() {
-    private val _subjects = listOf(
-        Subject("1", "Математика", "Научная дисциплина, изучающая числа, величины и их отношения."),
-        Subject("2", "Физика", "Научная дисциплина, изучающая природные явления и процессы."),
-        Subject("3", "Химия", "Научная дисциплина, изучающая свойства веществ и их преобразования.")
+    private val _subjects = mutableListOf(
+        Subject(UUID.randomUUID().toString(), "Математика", DrawingViewModel(), PdfViewModel()),
+        Subject(UUID.randomUUID().toString(), "Физика", DrawingViewModel(), PdfViewModel()),
+        Subject(UUID.randomUUID().toString(), "Химия", DrawingViewModel(), PdfViewModel())
     )
     val subjects: List<Subject> get() = _subjects
 
-    fun onSubjectClick(subject: Subject) {
-        Log.d("SUBJECT", "Вы выбрали предмет: ${subject.name}")
+    fun addSubject(name : String) {
+        _subjects.add(
+            Subject(
+                id = UUID.randomUUID().toString(),
+                name = name,
+                drawingViewModel = DrawingViewModel(),
+                pdfViewModels = PdfViewModel()
+            )
+        )
+    }
+
+    fun onSubjectClick(subject: Subject, navController: NavHostController) {
+        navController.navigate("subject/${subject.id}/home")
     }
 }

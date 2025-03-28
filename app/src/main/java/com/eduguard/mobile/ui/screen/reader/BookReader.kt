@@ -1,28 +1,40 @@
-package com.eduguard.mobile.ui.screen.book
+package com.eduguard.mobile.ui.screen.reader
 
-import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.pdf.PdfRenderer
+ import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Bundle
-import android.os.ParcelFileDescriptor
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -30,16 +42,12 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.eduguard.mobile.data.viewmodel.PdfViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
 
 @Composable
 fun FilePicker(onFileSelected: (Uri) -> Unit) {
-    val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -64,14 +72,21 @@ fun FilePicker(onFileSelected: (Uri) -> Unit) {
 }
 
 @Composable
-fun BookScreen(navController: NavHostController, vm: PdfViewModel) {
+fun BookScreen(
+    pdfViewModel: PdfViewModel = viewModel(),
+    modifier : Modifier
+) {
     var scale by remember { mutableStateOf(1f) }
     val context = LocalContext.current
     var currentPageBitmap by remember { mutableStateOf<Bitmap?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(vm.activePdf?.uri, vm.activePdf?.currentPageIndex) {
-        vm.activePdf?.let { pdf ->
+    val currentPdf = pdfViewModel.activePdf
+    val totalPages = currentPdf?.pageCount ?: 0
+    val showNavigation = totalPages > 1
+
+    LaunchedEffect(pdfViewModel.activePdf?.uri, pdfViewModel.activePdf?.currentPageIndex) {
+        pdfViewModel.activePdf?.let { pdf ->
             currentPageBitmap = pdf.loadPage()
         }
     }
@@ -79,48 +94,41 @@ fun BookScreen(navController: NavHostController, vm: PdfViewModel) {
     var showFilePicker by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = {
-            Row(modifier = Modifier.padding(8.dp)) {
-                Button(
-                    onClick = { navController.navigate("split") },
-                    modifier = Modifier.padding(end = 8.dp)
-                ) {
-                    Text(text = "Раздельный экран")
-                }
-                Button(
-                    onClick = { navController.navigate("home") },
-                    modifier = Modifier.padding(end = 8.dp)
-                ) {
-                    Text(text = "Домой")
-                }
-            }
-        },
+        modifier = modifier,
         bottomBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 8.dp, bottom = 100.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(
-                    onClick = {
-                        vm.activePdf?.previousPage()
-                        coroutineScope.launch {
-                            currentPageBitmap = vm.activePdf?.loadPage()
-                        }
-                    }
+            if (showNavigation) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 8.dp, bottom = 100.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Previous Page")
-                }
-                IconButton(
-                    onClick = {
-                        vm.activePdf?.nextPage()
-                        coroutineScope.launch {
-                            currentPageBitmap = vm.activePdf?.loadPage()
+                    IconButton(
+                        onClick = {
+                            pdfViewModel.activePdf?.previousPage()
+                            coroutineScope.launch {
+                                currentPageBitmap = pdfViewModel.activePdf?.loadPage()
+                            }
                         }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = "Previous Page"
+                        )
                     }
-                ) {
-                    Icon(imageVector = Icons.Default.ArrowForward, contentDescription = "Next Page")
+                    IconButton(
+                        onClick = {
+                            pdfViewModel.activePdf?.nextPage()
+                            coroutineScope.launch {
+                                currentPageBitmap = pdfViewModel.activePdf?.loadPage()
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = "Next Page"
+                        )
+                    }
                 }
             }
         }
@@ -134,19 +142,19 @@ fun BookScreen(navController: NavHostController, vm: PdfViewModel) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                itemsIndexed(vm.pdfs) { index, pdf ->
+                itemsIndexed(pdfViewModel.pdfs) { index, pdf ->
                     Card(
                         modifier = Modifier
                             .padding(4.dp)
-                            .clickable { vm.switchToPdf(index) },
+                            .clickable { pdfViewModel.switchToPdf(index) },
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(text = "PDF ${index + 1}", maxLines = 1)
-                            IconButton(onClick = { vm.closePdf(index) }) {
+                            IconButton(onClick = { pdfViewModel.closePdf(index) }) {
                                 Icon(Icons.Default.Close, contentDescription = "Close PDF")
                             }
                         }
@@ -154,17 +162,17 @@ fun BookScreen(navController: NavHostController, vm: PdfViewModel) {
                 }
             }
 
-            if (vm.pdfs.isEmpty()) {
+            if (pdfViewModel.pdfs.isEmpty()) {
                 FilePicker { uri ->
                     coroutineScope.launch {
-                        vm.addPdf(uri, context.contentResolver)
+                        pdfViewModel.addPdf(uri, context.contentResolver)
                     }
                 }
             } else {
                 if (showFilePicker) {
                     FilePicker { uri ->
                         coroutineScope.launch {
-                            vm.addPdf(uri, context.contentResolver)
+                            pdfViewModel.addPdf(uri, context.contentResolver)
                         }
                         showFilePicker = false
                     }
